@@ -14,7 +14,7 @@
 - [x] GitHub Student Pack imkoniyatlari aniqlandi
 - [x] doc/ hujjat strukturasi yaratildi
 - [x] vizitka.me domain — Namecheap orqali band qilindi
-- [ ] GitHub repo yaratish
+- [x] GitHub repo yaratildi
 - [ ] Next.js loyiha init
 - [ ] .env fayl sozlash
 - [ ] Supabase project ulash
