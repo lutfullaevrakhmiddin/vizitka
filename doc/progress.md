@@ -15,7 +15,7 @@
 - [x] doc/ hujjat strukturasi yaratildi
 - [x] vizitka.me domain — Namecheap orqali band qilindi
 - [x] GitHub repo yaratildi
-- [ ] Next.js loyiha init
+- [x] Next.js loyiha init + shadcn/ui
 - [x] .env.local fayl sozlash
 - [x] Supabase project ulash (Frankfurt, Healthy)
 - [ ] Telegram bot yaratish
@@ -88,10 +88,10 @@
 - [ ] Ozgarishlarni saqlash
 
 ### 1.5 Database
-- [ ] profiles jadvali
-- [ ] tabs jadvali
-- [ ] blocks jadvali
-- [ ] RLS qoidalari
+- [x] profiles jadvali
+- [x] tabs jadvali
+- [x] blocks jadvali
+- [x] RLS qoidalari
 - [ ] Storage bucket (profil rasmlar)
 
 ### 1.6 Telegram Bot
