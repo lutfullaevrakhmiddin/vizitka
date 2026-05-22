@@ -19,7 +19,7 @@
 - [x] .env.local fayl sozlash
 - [x] Supabase project ulash (Frankfurt, Healthy)
 - [x] Telegram bot — @vizitka_official_bot
-- [ ] Vercel deploy sozlash
+- [x] Vercel deploy sozlash
 
 ---
 
