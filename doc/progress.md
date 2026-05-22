@@ -92,7 +92,7 @@
 - [x] tabs jadvali
 - [x] blocks jadvali
 - [x] RLS qoidalari
-- [ ] Storage bucket (profil rasmlar)
+- [x] Storage bucket — avatars (public)
 
 ### 1.6 Telegram Bot
 - [ ] Bot yaratish (@BotFather)
