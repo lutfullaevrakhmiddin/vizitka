@@ -16,8 +16,8 @@
 - [x] vizitka.me domain — Namecheap orqali band qilindi
 - [x] GitHub repo yaratildi
 - [ ] Next.js loyiha init
-- [ ] .env fayl sozlash
-- [ ] Supabase project ulash
+- [x] .env.local fayl sozlash
+- [x] Supabase project ulash (Frankfurt, Healthy)
 - [ ] Telegram bot yaratish
 - [ ] Vercel deploy sozlash
 
