@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<title>vizitka.me — Sardor Rahimov</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    min-height: 100%;
+    background:
+      radial-gradient(ellipse at top, #15131f 0%, #07070f 55%, #050509 100%);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    color: #f0eeff;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    padding: 32px 16px;
+    box-sizing: border-box;
+  }
+  #root { display: flex; align-items: center; justify-content: center; }
+
+  /* Hover states */
+  .vz-tab:hover { color: rgba(240,238,255,0.7) !important; }
+  .vz-action:hover { filter: brightness(1.08); transform: translateY(-0.5px); }
+  .vz-social:hover { background: rgba(255,255,255,0.05) !important; }
+  .vz-cta:hover {
+    background: rgba(124,107,255,0.14) !important;
+    border-color: rgba(124,107,255,0.5) !important;
+    box-shadow: 0 0 0 4px rgba(124,107,255,0.08);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 0; height: 0; }
+
+  /* Pulsing down-arrow */
+  @keyframes vzPulseDown {
+    0%   { transform: translateY(-4px); opacity: 0.25; }
+    50%  { transform: translateY(2px);  opacity: 0.65; }
+    100% { transform: translateY(-4px); opacity: 0.25; }
+  }
+  .vz-pulse-arrow {
+    display: inline-flex;
+    animation: vzPulseDown 1.8s ease-in-out infinite;
+  }
+
+  /* Subtle entrance */
+  @keyframes vzFadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #root > * { animation: vzFadeUp 480ms cubic-bezier(.2,.7,.2,1) both; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="vizitka.jsx"></script>
+
+<script type="text/babel">
+  function Mount() {
+    return (
+      <IOSDevice width={390} height={844} dark>
+        <VizitkaApp />
+      </IOSDevice>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<Mount />);
+</script>
+</body>
+</html>

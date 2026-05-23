@@ -85,3 +85,22 @@ Band username tekshiruvi:
 ## Dizayn
 - Hozir: skelet va struktura
 - Keyinchalik: Figma da ranglar, fontlar, komponentlar
+
+---
+
+## Tolov usullari xavfsizligi
+
+Birinchi tavsiya: Click / Payme havolasi
+  - Foydalanuvchi tolov ilovasiga otadi
+  - Karta raqami hech qayerda korinmaydi
+  - SSL + Payme/Click xavfsizlik tizimi
+
+Ikkinchi variant: Karta raqamini nusxalash
+  - Faqat Click/Payme bolmagan banklar uchun
+  - Clipboard ga faqat raqamlar boradi (hech qanday matn yoq)
+  - Foydalanuvchi xavfni tushunib ishlatadi
+
+Tartib vizitka sahifasida:
+  1. Click havolasi  (birinchi, eng korinardi)
+  2. Payme havolasi  (ikkinchi)
+  3. Karta nusxalash (uchinchi, boshqa banklar uchun)
