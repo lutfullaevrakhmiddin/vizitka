@@ -28,6 +28,7 @@ const STYLES = `
   .cta-banner-btn:hover { background: rgba(124,107,255,0.15) !important; transform: scale(1.02); }
   .c-btn-ghost:hover    { background: rgba(255,255,255,0.1) !important; }
   .c-btn-primary:hover  { background: rgba(124,107,255,0.25) !important; }
+  .social-card:hover    { border-color: rgba(124,107,255,0.35) !important; background: rgba(124,107,255,0.05) !important; transform: translateY(-2px); }
 `
 
 // ── Tabs ───────────────────────────────────────────────────────────────────────
@@ -410,6 +411,228 @@ function AloqaTab({ showToast }: { showToast: (text: string) => void }) {
   )
 }
 
+// ── Ijtimoiy: brand icons ──────────────────────────────────────────────────────
+
+function IconTelegram() {
+  return (
+    <svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <defs>
+        <linearGradient id="vzTgGrad" x1="12" y1="0" x2="12" y2="24" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#2AABEE"/>
+          <stop offset="1" stopColor="#229ED9"/>
+        </linearGradient>
+      </defs>
+      <circle cx="12" cy="12" r="12" fill="url(#vzTgGrad)"/>
+      <path d="M5.52 11.99l13.57-5.23c.63-.24 1.18.15.97.97l-2.33 10.97c-.17.8-.64.99-1.3.62l-3.6-2.65-1.74 1.68c-.2.19-.35.35-.72.35l.26-3.65 6.6-5.97c.29-.26-.06-.4-.44-.14l-8.16 5.14-3.52-1.1c-.76-.24-.78-.76.17-1.12z" fill="white"/>
+    </svg>
+  )
+}
+
+function IconInstagram() {
+  return (
+    <svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <defs>
+        <linearGradient id="vzIgGrad" x1="0" y1="24" x2="24" y2="0" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FFDC80"/>
+          <stop offset="0.4" stopColor="#F77737"/>
+          <stop offset="0.75" stopColor="#E1306C"/>
+          <stop offset="1" stopColor="#833AB4"/>
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#vzIgGrad)"/>
+      <circle cx="12" cy="12" r="4.5" stroke="white" strokeWidth="1.7" fill="none"/>
+      <circle cx="17.3" cy="6.7" r="1.2" fill="white"/>
+    </svg>
+  )
+}
+
+function IconLinkedIn() {
+  return (
+    <svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="4" fill="#0A66C2"/>
+      <rect x="6.5" y="10" width="2" height="7.5" rx="1" fill="white"/>
+      <circle cx="7.5" cy="7.2" r="1.3" fill="white"/>
+      <path d="M12.5 17.5V14c0-1.1.9-2 2-2s2 .9 2 2v3.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      <rect x="11.5" y="10" width="2" height="7.5" rx="1" fill="white"/>
+    </svg>
+  )
+}
+
+function IconGitHub() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="#f0eeff">
+      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.907-.619.069-.607.069-.607 1.002.07 1.53 1.029 1.53 1.029.892 1.528 2.341 1.087 2.91.831.092-.645.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.272.098-2.65 0 0 .84-.268 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.026 2.747-1.026.546 1.378.202 2.397.1 2.65.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.577.688.48A9.997 9.997 0 0022 12c0-5.523-4.477-10-10-10z"/>
+    </svg>
+  )
+}
+
+function IconYouTube() {
+  return (
+    <svg width={22} height={18} viewBox="0 0 24 18" fill="none">
+      <path d="M23.495 2.796a3.007 3.007 0 00-2.088-2.088C19.538.18 12 .18 12 .18s-7.538 0-9.407.528A3.007 3.007 0 00.505 2.796 31.247 31.247 0 000 9a31.247 31.247 0 00.522 6.204 3.007 3.007 0 002.088 2.088C4.462 17.82 12 17.82 12 17.82s7.538 0 9.407-.528a3.007 3.007 0 002.088-2.088A31.247 31.247 0 0024 9a31.247 31.247 0 00-.505-6.204z" fill="#FF0000"/>
+      <path d="M9.545 12.818V5.182L15.818 9l-6.273 3.818z" fill="white"/>
+    </svg>
+  )
+}
+
+function IconTikTok() {
+  const d = "M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1-.06z"
+  return (
+    <svg width={18} height={20} viewBox="0 0 24 24" fill="none">
+      <path d={d} fill="#69C9D0" transform="translate(-1.2, 0)"/>
+      <path d={d} fill="#EE1D52" transform="translate(1.2, 0)"/>
+      <path d={d} fill="#f0eeff"/>
+    </svg>
+  )
+}
+
+// ── Ijtimoiy: social card + tab ────────────────────────────────────────────────
+
+function SocialCard({ iconBg, icon, name, handle, url }: {
+  iconBg: string; icon: React.ReactNode; name: string; handle: string; url: string
+}) {
+  return (
+    <div
+      className="social-card"
+      onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        border: '0.5px solid rgba(255,255,255,0.06)',
+        borderRadius: 14, padding: '14px 13px',
+        display: 'flex', alignItems: 'center', gap: 10,
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+      }}
+    >
+      <div style={{
+        width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+        background: iconBg,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden',
+      }}>
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+        <div style={{ fontSize: 13, color: '#f0eeff', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {name}
+        </div>
+        <div style={{ fontSize: 11, color: 'rgba(240,238,255,0.3)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {handle}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function IjtimoiyTab() {
+  return (
+    <div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <SocialCard iconBg="rgba(34,158,217,0.12)"  icon={<IconTelegram />}  name="Telegram"  handle="@sardor_dev"  url="https://t.me/sardor_dev" />
+        <SocialCard iconBg="rgba(225,48,108,0.1)"   icon={<IconInstagram />} name="Instagram" handle="@sardor.dev"  url="https://instagram.com/sardor.dev" />
+        <SocialCard iconBg="rgba(10,102,194,0.1)"   icon={<IconLinkedIn />}  name="LinkedIn"  handle="/in/sardor"   url="https://linkedin.com/in/sardor" />
+        <SocialCard iconBg="rgba(255,255,255,0.06)" icon={<IconGitHub />}    name="GitHub"    handle="@sardor-dev"  url="https://github.com/sardor-dev" />
+        <SocialCard iconBg="rgba(255,0,0,0.1)"      icon={<IconYouTube />}  name="YouTube"   handle="@sardor"      url="https://youtube.com/@sardor" />
+        <SocialCard iconBg="rgba(255,255,255,0.06)" icon={<IconTikTok />}   name="TikTok"    handle="@sardor.dev"  url="https://tiktok.com/@sardor.dev" />
+      </div>
+      <ConversionBanner />
+    </div>
+  )
+}
+
+// ── Qoshimcha: icons + tab ────────────────────────────────────────────────────
+
+function IconFilePdf({ color }: { color: string }) {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
+        stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M14 2v6h6" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <text x="5.5" y="19.5" fontSize="5.5" fontWeight="700" fill={color} fontFamily="system-ui,sans-serif">PDF</text>
+    </svg>
+  )
+}
+
+function IconEye({ color }: { color: string }) {
+  return (
+    <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+      <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke={color} strokeWidth="1.3"/>
+      <circle cx="8" cy="8" r="2" stroke={color} strokeWidth="1.3"/>
+    </svg>
+  )
+}
+
+function IconDownload({ color }: { color: string }) {
+  return (
+    <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+      <path d="M8 2v8M5 7.5l3 3 3-3" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2 13h12" stroke={color} strokeWidth="1.3" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+function QoshimchaTab() {
+  return (
+    <div>
+      {/* ─ Xizmatlar ─ */}
+      <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(240,238,255,0.2)', marginBottom: 12 }}>
+        Xizmatlar
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 15px', marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 14, color: '#f0eeff', fontWeight: 500 }}>Veb sayt yaratish</span>
+          <span style={{ fontSize: 14, color: '#a78bfa', fontWeight: 500 }}>$200+</span>
+        </div>
+        <div style={{ fontSize: 12, color: 'rgba(240,238,255,0.3)' }}>
+          Next.js, React asosida zamonaviy veb saytlar
+        </div>
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 15px', marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 14, color: '#f0eeff', fontWeight: 500 }}>UI/UX dizayn</span>
+          <span style={{ fontSize: 14, color: '#a78bfa', fontWeight: 500 }}>$100+</span>
+        </div>
+        <div style={{ fontSize: 12, color: 'rgba(240,238,255,0.3)' }}>
+          Figma da professional interfeys dizayni
+        </div>
+      </div>
+
+      {/* ─ Hujjatlar ─ */}
+      <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(240,238,255,0.2)', marginTop: 20, marginBottom: 12 }}>
+        Hujjatlar
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 15px', marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, background: 'rgba(240,180,41,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <IconFilePdf color="#f0b429"/>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, color: 'rgba(240,238,255,0.25)', marginBottom: 3 }}>Rezyume</div>
+            <div style={{ fontSize: 14, color: '#f0eeff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              sardor_cv_2025.pdf
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <CBtn href="#">
+            <IconEye color="rgba(240,238,255,0.5)"/>
+            <span>Ko'rish</span>
+          </CBtn>
+          <CBtn primary href="#">
+            <IconDownload color="#a78bfa"/>
+            <span>Yuklab olish</span>
+          </CBtn>
+        </div>
+      </div>
+
+      <ConversionBanner />
+    </div>
+  )
+}
+
 // ── Toast ──────────────────────────────────────────────────────────────────────
 
 function Toast({ text, visible }: { text: string; visible: boolean }) {
@@ -579,13 +802,10 @@ export default function ProfilePage({ params }: { params: { username: string } }
 
           {/* ── Content ── */}
           <div key={activeTab} style={{ padding: '20px 20px 48px', animation: 'tabIn 0.2s ease-out both' }}>
-            {activeTab === 'haqida' && <HaqidaTab />}
-            {activeTab === 'aloqa'  && <AloqaTab showToast={showToast} />}
-            {(activeTab === 'ijtimoiy' || activeTab === 'qoshimcha') && (
-              <p style={{ color: 'rgba(240,238,255,0.15)', fontSize: 13, textAlign: 'center', margin: '40px 0 0' }}>
-                {activeTab}
-              </p>
-            )}
+            {activeTab === 'haqida'    && <HaqidaTab />}
+            {activeTab === 'aloqa'     && <AloqaTab showToast={showToast} />}
+            {activeTab === 'ijtimoiy'  && <IjtimoiyTab />}
+            {activeTab === 'qoshimcha' && <QoshimchaTab />}
           </div>
 
         </div>
