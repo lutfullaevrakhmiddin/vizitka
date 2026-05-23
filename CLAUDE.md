@@ -183,14 +183,29 @@ Min tap target: 44x44px
 
 ## Pages Status
 ```
-/                   ⬜ Landing page
+/                   ✅ Done (landing page — mehmon uchun)
 /auth/login         ✅ Done
 /auth/register      ✅ Done (3 steps: method → OTP → username+password)
 /auth/verify        ⬜ Pending
 /auth/forgot        ⬜ Pending
-/[username]         ⬜ Vizitka page
+/[username]         ✅ Done (guest/static view — barcha 4 tab)
 /dashboard          ⬜ Redirect → /[username]?edit=true
 ```
+
+---
+
+## Landing Page — / (app/page.tsx)
+Sections (top → bottom):
+```
+Nav          sticky, blurred — vizitka.me brand + "Kirish" → /auth/login
+Hero         status pill · h1 · tagline · 2 CTA buttons · floating phone mockup
+Steps        "Qanday ishlaydi" — 3 numbered step cards (01/02/03)
+Features     "Nima uchun vizitka.me" — 2×2 grid (Xavfsiz · Tez · Qulay · Bepul)
+Showcase     "Real vizitkalar" — horizontal scroll, 3 sample profile cards
+CTA          purple gradient card — "Hoziroq boshlang" + primary button
+Footer       brand + copyright
+```
+Animations used: `orbFloat`, `fadeUp`, `vzPulse`, `vzGlow`, `vzFloat`
 
 ---
 
@@ -198,8 +213,8 @@ Min tap target: 44x44px
 ```
 Tab 1: Haqida      → avatar, ism familiya, kasb, kompaniya, shahar, bio (160 belgi)
 Tab 2: Aloqa       → telefon, email, karta (HIDDEN, copy only), click, payme
-Tab 3: Ijtimoiy    → telegram, instagram, linkedin, github, youtube, tiktok, custom
-Tab 4: Qoshimcha   → xizmatlar, portfolio, PDF (egasi yoqsa korinadi)
+Tab 3: Ijtimoiy    → 2-column grid, 6 social cards (Telegram/Instagram/LinkedIn/GitHub/YouTube/TikTok)
+Tab 4: Qo'shimcha  → xizmatlar (2 ta), hujjatlar (PDF card — ko'rish + yuklab olish)
 ```
 
 ### Mehmon vs Egasi
