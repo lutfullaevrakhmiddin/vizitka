@@ -75,10 +75,10 @@
 - [ ] Rezyume PDF
 
 #### Umumiy
-- [ ] Mehmon: faqat faol tablar
-- [ ] Egasi: hammasi + tahrirlash paneli
-- [ ] QR kod — mehmon ham koradi, egasi yuklab oladi
-- [ ] Sahifani ulashish tugmasi
+- [x] Mehmon: faqat faol tablar
+- [x] Vizitka sahifasi — mehmon korinishi tayyor
+- [x] QR kod — mehmon ham koradi
+- [x] Sahifani ulashish tugmasi
 
 ### 1.4 Tahrirlash paneli
 - [ ] Profil malumotlarini tahrirlash
