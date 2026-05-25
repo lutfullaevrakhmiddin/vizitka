@@ -35,7 +35,7 @@
 
 ### 1.2 Auth
 - [ ] Usul tanlash (Telegram / Email)
-- [ ] Telegram: bot kod yuboradi
+- [x] Telegram: bot kod yuboradi
 - [ ] Email: kod yuboriladi
 - [ ] Kodni tasdiqlash
 - [ ] Username tanlash (vizitka.me/[username])
@@ -46,33 +46,33 @@
 ### 1.3 Vizitka — /[username]
 
 #### Tab 1: Haqida
-- [ ] Profil rasmi
-- [ ] Ism Familiya
-- [ ] Kasb / Lavozim
-- [ ] Kompaniya
-- [ ] Shahar
-- [ ] Bio (max 160 belgi)
+- [x] Profil rasmi
+- [x] Ism Familiya
+- [x] Kasb / Lavozim
+- [x] Kompaniya
+- [x] Shahar
+- [x] Bio
 
 #### Tab 2: Aloqa
-- [ ] Telefon (qongiroq + nusxa)
-- [ ] Email (ochish + nusxa)
-- [ ] Karta — ekranda KORINMAYDI, faqat nusxalash
-- [ ] Click havolasi
-- [ ] Payme havolasi
+- [x] Telefon
+- [x] Email
+- [x] Karta — faqat nusxalash
+- [x] Click havolasi
+- [x] Payme havolasi
 
 #### Tab 3: Ijtimoiy
-- [ ] Telegram
-- [ ] Instagram
-- [ ] LinkedIn
-- [ ] GitHub
-- [ ] YouTube
-- [ ] TikTok
-- [ ] Boshqa link (custom)
+- [x] Telegram
+- [x] Instagram
+- [x] LinkedIn
+- [x] GitHub
+- [x] YouTube
+- [x] TikTok
+- [x] Boshqa link
 
 #### Tab 4: Qoshimcha (egasi yoqsa korinadi)
-- [ ] Xizmatlar
-- [ ] Portfolio
-- [ ] Rezyume PDF
+- [x] Xizmatlar
+- [x] Portfolio
+- [x] Rezyume PDF
 
 #### Umumiy
 - [x] Mehmon: faqat faol tablar
