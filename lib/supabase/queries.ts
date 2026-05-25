@@ -21,13 +21,13 @@ export async function getProfile(username: string): Promise<Profile | null> {
 export async function getProfileWithTabs(username: string): Promise<ProfileWithTabs | null> {
   const supabase = await createClient()
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
     .eq('username', username)
     .single()
 
-  if (!profile) return null
+  console.log("PROFILE:", JSON.stringify(profile)); if (!profile) return null
 
   const [{ data: tabs }, { data: blocks }] = await Promise.all([
     supabase

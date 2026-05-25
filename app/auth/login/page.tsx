@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const [id, setId] = useState('')
@@ -10,24 +12,52 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [shake, setShake] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [tgMsg, setTgMsg] = useState(false)
+  const router = useRouter()
 
   const detect = id.includes('@') ? 'email' : id.length > 0 ? 'username' : null
 
-  const submit = () => {
+  const triggerShake = () => {
+    setShake(true)
+    setTimeout(() => setShake(false), 400)
+  }
+
+  const submit = async () => {
     if (!id || pw.length < 4) {
       setError('Username va parolni kiriting')
-      setShake(true)
-      setTimeout(() => setShake(false), 400)
+      triggerShake()
       return
     }
     setLoading(true)
     setError('')
-    setTimeout(() => {
+    try {
+      const supabase = createClient()
+      let email = id
+
+      if (!id.includes('@')) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('username', id.toLowerCase())
+          .single()
+        if (!profile?.email) {
+          setError('Bunday foydalanuvchi topilmadi')
+          triggerShake()
+          return
+        }
+        email = profile.email as string
+      }
+
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password: pw })
+      if (authError) {
+        setError("Email yoki parol noto'g'ri")
+        triggerShake()
+        return
+      }
+      window.location.href =('/sardor')
+    } finally {
       setLoading(false)
-      setError('Email yoki parol noto\'g\'ri')
-      setShake(true)
-      setTimeout(() => setShake(false), 400)
-    }, 700)
+    }
   }
 
   return (
@@ -58,10 +88,6 @@ export default function LoginPage() {
           40%     { transform:translateX(6px); }
           60%     { transform:translateX(-4px); }
           80%     { transform:translateX(4px); }
-        }
-        @keyframes shimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position:  200% center; }
         }
         .orb {
           position: fixed;
@@ -203,6 +229,7 @@ export default function LoginPage() {
             placeholder="••••••••"
             style={{paddingRight:60}}
             onKeyDown={e => e.key==='Enter' && submit()}
+            suppressHydrationWarning={true}
           />
           <button
             onClick={() => setShowPw(!showPw)}
@@ -247,7 +274,7 @@ export default function LoginPage() {
         </div>
 
         {/* Telegram */}
-        <button className="btn-tg">
+        <button className="btn-tg" onClick={() => setTgMsg(true)}>
           <div style={{width:20,height:20,background:'#229ED9',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="white">
               <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.483c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.875.738z"/>
@@ -255,6 +282,21 @@ export default function LoginPage() {
           </div>
           Telegram orqali kirish
         </button>
+
+        {tgMsg && (
+          <div style={{
+            background:'rgba(34,158,217,0.08)',
+            border:'0.5px solid rgba(34,158,217,0.2)',
+            borderRadius:10,
+            padding:'10px 13px',
+            fontSize:13,
+            color:'rgba(34,158,217,0.7)',
+            marginTop:10,
+            textAlign:'center',
+          }}>
+            Tez orada...
+          </div>
+        )}
 
         {/* Ro'yxat */}
         <div style={{textAlign:'center',marginTop:20,fontSize:13,color:'rgba(240,238,255,0.25)'}}>

@@ -43,3 +43,4 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const { tabs, ...profile } = data
   return <ProfileClient profile={profile} tabs={tabs} />
 }
+// TEMP: add this before getProfileWithTabs call
