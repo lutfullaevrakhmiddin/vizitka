@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Vizitka.me — Landing</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; min-height: 100%;
+    background: #0a0a0e;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #root {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 16px;
+    box-sizing: border-box;
+    background:
+      radial-gradient(1200px 800px at 20% 0%, rgba(124,107,255,0.06) 0%, transparent 60%),
+      radial-gradient(900px 700px at 90% 100%, rgba(255,126,179,0.04) 0%, transparent 60%),
+      #0a0a0e;
+  }
+
+  /* Scrollbar hide for inner scroll */
+  .vz-scroll::-webkit-scrollbar { display: none; }
+  .vz-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+  /* Animations */
+  @keyframes vzPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(93,202,165,0.45); }
+    50%      { box-shadow: 0 0 0 6px rgba(93,202,165,0); }
+  }
+  @keyframes vzGlow {
+    0%, 100% { box-shadow: 0 6px 24px var(--vz-glow-low, rgba(124,107,255,0.28)),
+                            0 0 0 0 var(--vz-glow-low, rgba(124,107,255,0.18)); }
+    50%      { box-shadow: 0 10px 32px var(--vz-glow-hi, rgba(124,107,255,0.45)),
+                            0 0 0 4px var(--vz-glow-mid, rgba(124,107,255,0.10)); }
+  }
+  @keyframes vzFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  @keyframes vzOrb1 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50%      { transform: translate(-12px, 16px) scale(1.05); }
+  }
+  @keyframes vzOrb2 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50%      { transform: translate(16px, -12px) scale(1.08); }
+  }
+</style>
+</head>
+<body style="font-family: sans-serif; font-size: 25px">
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="landing.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#5b8def",
+  "showFrame": true
+}/*EDITMODE-END*/;
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  // sync glow color CSS vars to the accent
+  React.useEffect(() => {
+    const a = t.accent;
+    const hex = a.replace('#','');
+    const r = parseInt(hex.substring(0,2),16);
+    const g = parseInt(hex.substring(2,4),16);
+    const b = parseInt(hex.substring(4,6),16);
+    document.documentElement.style.setProperty('--vz-glow-low',  `rgba(${r},${g},${b},0.28)`);
+    document.documentElement.style.setProperty('--vz-glow-mid',  `rgba(${r},${g},${b},0.10)`);
+    document.documentElement.style.setProperty('--vz-glow-hi',   `rgba(${r},${g},${b},0.45)`);
+  }, [t.accent]);
+
+  const landing = <VizitkaLanding accent={t.accent} />;
+
+  return (
+    <>
+      {t.showFrame ? (
+        <IOSDevice width={390} height={780} dark={true}>
+          {landing}
+        </IOSDevice>
+      ) : (
+        <div style={{
+          width: 390, height: 780, borderRadius: 24, overflow: 'hidden',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+        }}>{landing}</div>
+      )}
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Brand" />
+        <TweakColor
+          label="Accent"
+          value={t.accent}
+          onChange={(v) => setTweak('accent', v)}
+          options={['#7c6bff', '#5dcaa5', '#f0b429', '#ff7eb3', '#5b8def']}
+        />
+        <TweakSection label="Display" />
+        <TweakToggle
+          label="iPhone frame"
+          value={t.showFrame}
+          onChange={(v) => setTweak('showFrame', v)}
+        />
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
