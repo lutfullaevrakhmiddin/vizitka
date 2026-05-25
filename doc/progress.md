@@ -18,6 +18,7 @@
 - [x] Next.js loyiha init + shadcn/ui
 - [x] .env.local fayl sozlash
 - [x] Supabase project ulash (Frankfurt, Healthy)
+- [x] Supabase integratsiya — real malumotlar ulandi
 - [x] Telegram bot — @vizitka_official_bot
 - [x] Vercel deploy sozlash
 
