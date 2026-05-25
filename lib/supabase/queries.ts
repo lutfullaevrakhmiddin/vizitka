@@ -103,3 +103,15 @@ export async function deleteBlock(id: string): Promise<void> {
     .eq('id', id)
   if (error) throw error
 }
+
+// TEMP DEBUG
+export async function debugProfile(username: string) {
+  const client = await createClient()
+  const { data, error } = await client
+    .from('profiles')
+    .select('*')
+    .eq('username', username)
+    .single()
+  console.log('DEBUG profile:', JSON.stringify({ data, error }))
+  return { data, error }
+}
