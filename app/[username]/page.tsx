@@ -1,3 +1,4 @@
+import { createClient } from '@/lib/supabase/server'
 import { getProfileWithTabs } from '@/lib/supabase/queries'
 import ProfileClient from './ProfileClient'
 
@@ -40,7 +41,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     )
   }
 
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isOwner = user?.id === data.id
+
   const { tabs, ...profile } = data
-  return <ProfileClient profile={profile} tabs={tabs} />
+  return <ProfileClient profile={profile} tabs={tabs} isOwner={isOwner} />
 }
-// TEMP: add this before getProfileWithTabs call

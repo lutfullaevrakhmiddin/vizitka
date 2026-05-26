@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import type { ReactNode, CSSProperties } from 'react'
 import type { Profile, TabWithBlocks, Block, TabSlug, BlockType } from '@/types'
 
@@ -31,6 +32,7 @@ const STYLES = `
   .c-btn-ghost:hover    { background: rgba(255,255,255,0.1) !important; }
   .c-btn-primary:hover  { background: rgba(124,107,255,0.25) !important; }
   .social-card:hover    { border-color: rgba(124,107,255,0.35) !important; background: rgba(124,107,255,0.05) !important; transform: translateY(-2px); }
+  .btn-edit:hover       { background: rgba(93,202,165,0.2) !important; }
 `
 
 // ── Icons (header) ─────────────────────────────────────────────────────────────
@@ -703,10 +705,12 @@ function Toast({ text, visible }: { text: string; visible: boolean }) {
 
 // ── ProfileClient ──────────────────────────────────────────────────────────────
 
-export default function ProfileClient({ profile, tabs }: {
+export default function ProfileClient({ profile, tabs, isOwner = false }: {
   profile: Profile
   tabs: TabWithBlocks[]
+  isOwner?: boolean
 }) {
+  const router = useRouter()
   const visibleTabs = tabs.filter(t => t.is_visible)
   const [activeTab, setActiveTab] = useState<TabSlug>(visibleTabs[0]?.slug ?? 'haqida')
   const [toast, setToast] = useState({ text: '', visible: false })
@@ -762,7 +766,28 @@ export default function ProfileClient({ profile, tabs }: {
         <div style={{ width: '100%', maxWidth: 390, position: 'relative', zIndex: 1 }}>
 
           {/* ── Header ── */}
-          <div style={{ padding: '48px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ padding: '48px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+            {isOwner && (
+              <button
+                className="btn-edit"
+                onClick={() => router.push(`/${profile.username}/edit`)}
+                style={{
+                  position: 'absolute', top: 14, right: 0,
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 13px', borderRadius: 10,
+                  background: 'rgba(93,202,165,0.12)',
+                  border: '0.5px solid rgba(93,202,165,0.3)',
+                  color: '#5dcaa5', fontSize: 13, fontWeight: 500,
+                  fontFamily: 'inherit', cursor: 'pointer',
+                  transition: 'background 0.18s',
+                }}
+              >
+                <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+                  <path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+                </svg>
+                Tahrirlash
+              </button>
+            )}
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
