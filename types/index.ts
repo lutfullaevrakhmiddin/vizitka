@@ -15,6 +15,7 @@ export type BlockType =
   | 'website'
   | 'pdf'
   | 'service'
+  | 'qr'
 
 // ─── Tab slugs ────────────────────────────────────────────────────────────────
 

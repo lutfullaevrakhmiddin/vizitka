@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ReactNode, CSSProperties } from 'react'
 import type { Profile, TabWithBlocks, Block, TabSlug, BlockType } from '@/types'
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
+import { createClient } from '@/lib/supabase/client'
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
@@ -267,18 +269,102 @@ function InfoCard({
   )
 }
 
-function HaqidaTab({ occupation, company, city, bio }: {
+function HaqidaTab({ occupation, company, city, bio, pdfBlocks, isOwner }: {
   occupation: string | null
   company: string | null
   city: string | null
   bio: string | null
+  pdfBlocks: Block[]
+  isOwner: boolean
 }) {
+  const [visMap, setVisMap] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(pdfBlocks.map(b => [b.id, b.is_visible]))
+  )
+
+  const handleTogglePdf = async (blockId: string) => {
+    const current = visMap[blockId] ?? true
+    const next = !current
+    setVisMap(prev => ({ ...prev, [blockId]: next }))
+    const supabase = createClient()
+    const { error } = await supabase.from('blocks').update({ is_visible: next }).eq('id', blockId)
+    if (error) setVisMap(prev => ({ ...prev, [blockId]: current }))
+  }
+
+  const blocksToShow = isOwner
+    ? pdfBlocks
+    : pdfBlocks.filter(b => visMap[b.id] ?? b.is_visible)
+
   return (
     <div>
       {occupation && <InfoCard iconBg="rgba(124,107,255,0.1)" icon={<IconBriefcase color="#a78bfa" />} label="Kasb" value={occupation} />}
       {company && <InfoCard iconBg="rgba(93,202,165,0.1)" icon={<IconBuilding color="#5dcaa5" />} label="Kompaniya" value={company} />}
       {city && <InfoCard iconBg="rgba(240,180,41,0.08)" icon={<IconMapPin color="#f0b429" />} label="Shahar" value={city} />}
       {bio && <InfoCard iconBg="rgba(124,107,255,0.1)" icon={<IconQuote color="#a78bfa" />} label="Bio" value={bio} valueMuted />}
+      {blocksToShow.map(block => {
+        const visible = visMap[block.id] ?? block.is_visible
+        return (
+          <div key={block.id} style={{
+            background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)',
+            borderRadius: 14, padding: '14px 15px', marginBottom: 10,
+            display: 'flex', flexDirection: 'column', gap: 10,
+            opacity: isOwner && !visible ? 0.4 : 1,
+            transition: 'opacity 0.2s',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, background: 'rgba(240,180,41,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconFilePdf color="#f0b429" />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 11, color: 'rgba(240,238,255,0.25)', marginBottom: 3 }}>PDF</div>
+                <div style={{ fontSize: 14, color: '#f0eeff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {block.label ?? 'hujjat.pdf'}
+                </div>
+              </div>
+              {isOwner && (
+                <button
+                  onClick={() => handleTogglePdf(block.id)}
+                  title={visible ? 'Yashirish' : "Ko'rsatish"}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: 6, borderRadius: 7, flexShrink: 0,
+                    color: visible ? '#5dcaa5' : 'rgba(255,128,128,0.7)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'opacity 0.15s',
+                  }}
+                >
+                  {visible ? (
+                    <svg width={15} height={15} viewBox="0 0 16 16" fill="none">
+                      <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
+                      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
+                    </svg>
+                  ) : (
+                    <svg width={15} height={15} viewBox="0 0 16 16" fill="none">
+                      <path d="M13.5 2.5l-11 11M6.2 5.1A6 6 0 011 8s2.5 5 7 5a6 6 0 003.8-1.3M4.5 4.5C5.5 3.6 6.7 3 8 3c4.5 0 7 5 7 5a12 12 0 01-1.5 2.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                </button>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <CBtn onClick={() => window.open(block.value + '?t=' + Date.now(), '_blank', 'noopener,noreferrer')}>
+                <IconEye color="rgba(240,238,255,0.5)" />
+                <span>Ko&apos;rish</span>
+              </CBtn>
+              <CBtn primary onClick={() => {
+                const a = document.createElement('a')
+                a.href = block.value + '?t=' + Date.now()
+                a.download = block.label ?? 'hujjat.pdf'
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+              }}>
+                <IconDownload color="#a78bfa" />
+                <span>Yuklab olish</span>
+              </CBtn>
+            </div>
+          </div>
+        )
+      })}
       <ConversionBanner />
     </div>
   )
@@ -366,7 +452,10 @@ function CBtn({
   return <button onClick={onClick} className={cls} style={style}>{children}</button>
 }
 
-function AloqaTab({ blocks, showToast }: { blocks: Block[]; showToast: (text: string) => void }) {
+function AloqaTab({ blocks, showToast }: {
+  blocks: Block[]
+  showToast: (text: string) => void
+}) {
   const copy = (raw: string, msg: string) => {
     navigator.clipboard?.writeText(raw).catch(() => {})
     showToast(msg)
@@ -564,7 +653,55 @@ function SocialCard({ iconBg, icon, name, handle, url }: {
   )
 }
 
-function IjtimoiyTab({ blocks }: { blocks: Block[] }) {
+function IjtimoiyTab({ blocks, username, isOwner, qrBlock, profileId }: {
+  blocks: Block[]
+  username: string
+  isOwner: boolean
+  qrBlock: Block | undefined
+  profileId: string
+}) {
+  const [qrVisible, setQrVisible] = useState(qrBlock?.is_visible ?? true)
+  const [qrBlockId, setQrBlockId] = useState<string | undefined>(qrBlock?.id)
+  const qrWrapRef = useRef<HTMLDivElement>(null)
+  const qrUrl = `https://vizitka.me/${username}`
+
+  const downloadQr = () => {
+    const canvas = qrWrapRef.current?.querySelector('canvas')
+    if (!canvas) return
+    const url = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `vizitka-${username}.png`
+    a.click()
+  }
+
+  const handleToggleQr = async () => {
+    const next = !qrVisible
+    setQrVisible(next)
+    const supabase = createClient()
+    if (qrBlockId) {
+      await supabase.from('blocks').update({ is_visible: next }).eq('id', qrBlockId)
+    } else {
+      const { data } = await supabase
+        .from('blocks')
+        .insert({
+          profile_id: profileId,
+          tab_slug: 'ijtimoiy',
+          type: 'qr',
+          value: 'auto',
+          label: 'QR Kod',
+          is_visible: next,
+          is_active: true,
+          sort_order: 99,
+        })
+        .select()
+        .single()
+      if (data) setQrBlockId(data.id)
+    }
+  }
+
+  const showQr = isOwner || qrVisible
+
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -583,6 +720,81 @@ function IjtimoiyTab({ blocks }: { blocks: Block[] }) {
           )
         })}
       </div>
+
+      {/* ── QR Code card ── */}
+      {showQr && (
+        <div style={{ marginTop: 10, marginBottom: 10 }}>
+          <div ref={qrWrapRef} style={{ position: 'fixed', left: -9999, top: -9999, pointerEvents: 'none' }}>
+            <QRCodeCanvas value={qrUrl} size={400} bgColor="#ffffff" fgColor="#07070f" />
+          </div>
+          <div style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '0.5px solid rgba(255,255,255,0.06)',
+            borderRadius: 14, padding: '18px 15px 14px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+          }}>
+            {isOwner && (
+              <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(240,238,255,0.25)' }}>
+                  QR Kod
+                </span>
+                <button
+                  onClick={handleToggleQr}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0',
+                    color: qrVisible ? '#5dcaa5' : 'rgba(255,128,128,0.7)',
+                    fontSize: 11, fontWeight: 500, fontFamily: 'inherit',
+                  }}
+                >
+                  {qrVisible ? (
+                    <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+                      <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" strokeWidth="1.3"/>
+                      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
+                    </svg>
+                  ) : (
+                    <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+                      <path d="M13.5 2.5l-11 11M6.2 5.1A6 6 0 011 8s2.5 5 7 5a6 6 0 003.8-1.3M4.5 4.5C5.5 3.6 6.7 3 8 3c4.5 0 7 5 7 5a12 12 0 01-1.5 2.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                  {qrVisible ? 'Mehmonlarga ko\'rinadi' : 'Mehmonlarga yashirilgan'}
+                </button>
+              </div>
+            )}
+            <div style={{ opacity: isOwner && !qrVisible ? 0.25 : 1, transition: 'opacity 0.2s' }}>
+              <div style={{ background: '#fff', borderRadius: 12, padding: 12, boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>
+                <QRCodeSVG value={qrUrl} size={140} bgColor="#ffffff" fgColor="#07070f" level="M" />
+              </div>
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(240,238,255,0.25)', fontFamily: 'monospace' }}>
+              vizitka.me/{username}
+            </div>
+            {isOwner && !qrVisible && (
+              <div style={{ fontSize: 11, color: 'rgba(255,128,128,0.6)', textAlign: 'center' }}>
+                Mehmonlar bu QR kodni ko&apos;rmaydi
+              </div>
+            )}
+            <button
+              onClick={downloadQr}
+              style={{
+                width: '100%', padding: '9px 0', borderRadius: 9,
+                background: 'rgba(124,107,255,0.1)', border: '0.5px solid rgba(124,107,255,0.25)',
+                color: '#a78bfa', fontSize: 13, fontWeight: 500,
+                cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                transition: 'background 0.15s',
+              }}
+            >
+              <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+                <path d="M8 2v8M5 7.5l3 3 3-3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 13h12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+              </svg>
+              Yuklab olish
+            </button>
+          </div>
+        </div>
+      )}
+
       <ConversionBanner />
     </div>
   )
@@ -616,66 +828,6 @@ function IconDownload({ color }: { color: string }) {
       <path d="M8 2v8M5 7.5l3 3 3-3" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M2 13h12" stroke={color} strokeWidth="1.3" strokeLinecap="round"/>
     </svg>
-  )
-}
-
-function QoshimchaTab({ blocks }: { blocks: Block[] }) {
-  const serviceBlocks = blocks.filter(b => b.type === 'service')
-  const pdfBlocks     = blocks.filter(b => b.type === 'pdf')
-
-  return (
-    <div>
-      {serviceBlocks.length > 0 && (
-        <>
-          <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(240,238,255,0.2)', marginBottom: 12 }}>
-            Xizmatlar
-          </div>
-          {serviceBlocks.map(block => (
-            <div key={block.id} style={{ background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 15px', marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 14, color: '#f0eeff', fontWeight: 500 }}>{block.label ?? 'Xizmat'}</span>
-                <span style={{ fontSize: 14, color: '#a78bfa', fontWeight: 500 }}>{block.value}</span>
-              </div>
-            </div>
-          ))}
-        </>
-      )}
-
-      {pdfBlocks.length > 0 && (
-        <>
-          <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: 1, textTransform: 'uppercase', color: 'rgba(240,238,255,0.2)', marginTop: serviceBlocks.length > 0 ? 20 : 0, marginBottom: 12 }}>
-            Hujjatlar
-          </div>
-          {pdfBlocks.map(block => (
-            <div key={block.id} style={{ background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 15px', marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, background: 'rgba(240,180,41,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <IconFilePdf color="#f0b429"/>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, color: 'rgba(240,238,255,0.25)', marginBottom: 3 }}>PDF</div>
-                  <div style={{ fontSize: 14, color: '#f0eeff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {block.label ?? 'hujjat.pdf'}
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <CBtn href={block.value} newTab>
-                  <IconEye color="rgba(240,238,255,0.5)"/>
-                  <span>Ko&apos;rish</span>
-                </CBtn>
-                <CBtn primary href={block.value} download={block.label ?? 'hujjat.pdf'}>
-                  <IconDownload color="#a78bfa"/>
-                  <span>Yuklab olish</span>
-                </CBtn>
-              </div>
-            </div>
-          ))}
-        </>
-      )}
-
-      <ConversionBanner />
-    </div>
   )
 }
 
@@ -729,9 +881,11 @@ export default function ProfileClient({ profile, tabs, isOwner = false }: {
   }, [])
 
   const tabsMap = Object.fromEntries(tabs.map(t => [t.slug, t]))
-  const aloqaBlocks     = (tabsMap['aloqa']?.blocks      ?? []).filter(b => b.is_visible)
-  const ijtimoiyBlocks  = (tabsMap['ijtimoiy']?.blocks   ?? []).filter(b => b.is_visible)
-  const qoshimchaBlocks = (tabsMap['qoshimcha']?.blocks  ?? []).filter(b => b.is_visible)
+  const aloqaBlocks     = (tabsMap['aloqa']?.blocks    ?? []).filter(b => b.is_visible)
+  const ijtimoiyAll     = tabsMap['ijtimoiy']?.blocks ?? []
+  const ijtimoiyBlocks  = ijtimoiyAll.filter(b => b.is_visible && b.type !== 'qr')
+  const qrBlock         = ijtimoiyAll.find(b => b.type === 'qr')
+  const haqidaPdfBlocks = (tabsMap['haqida']?.blocks  ?? []).filter(b => b.type === 'pdf')
 
   const initials = profile.full_name
     ? profile.full_name.trim().split(/\s+/).map(n => n[0]).slice(0, 2).join('').toUpperCase()
@@ -763,10 +917,10 @@ export default function ProfileClient({ profile, tabs, isOwner = false }: {
         WebkitFontSmoothing: 'antialiased',
         position: 'relative',
       }}>
-        <div style={{ width: '100%', maxWidth: 390, position: 'relative', zIndex: 1 }}>
+        <div style={{ width: '100%', maxWidth: 390, position: 'relative', zIndex: 2 }}>
 
           {/* ── Header ── */}
-          <div style={{ padding: '48px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+          <div style={{ padding: '48px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', isolation: 'isolate' }}>
             {isOwner && (
               <button
                 className="btn-edit"
@@ -870,10 +1024,11 @@ export default function ProfileClient({ profile, tabs, isOwner = false }: {
 
           {/* ── Tab bar ── */}
           <div style={{
-            position: 'sticky', top: 0, zIndex: 10,
+            position: 'sticky', top: 0, zIndex: 50,
             background: '#07070f',
             borderBottom: '0.5px solid rgba(255,255,255,0.06)',
             display: 'flex',
+            touchAction: 'manipulation',
           }}>
             {visibleTabs.map(tab => {
               const isActive = tab.slug === activeTab
@@ -882,13 +1037,18 @@ export default function ProfileClient({ profile, tabs, isOwner = false }: {
                   key={tab.slug}
                   className="tab-btn"
                   onClick={() => setActiveTab(tab.slug)}
+                  onTouchEnd={e => { e.preventDefault(); setActiveTab(tab.slug) }}
                   style={{
-                    flex: 1, padding: '13px 4px',
+                    flex: 1, minHeight: 44, padding: '0 4px',
                     background: 'transparent', border: 'none',
                     borderBottom: `1.5px solid ${isActive ? '#7c6bff' : 'transparent'}`,
                     color: isActive ? '#a78bfa' : 'rgba(240,238,255,0.3)',
                     fontSize: 13, fontWeight: isActive ? 500 : 400,
                     fontFamily: 'inherit', cursor: 'pointer',
+                    position: 'relative', zIndex: 51,
+                    pointerEvents: 'all',
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent',
                     transition: 'color 0.2s, border-color 0.2s',
                     marginBottom: -1,
                   }}
@@ -907,11 +1067,12 @@ export default function ProfileClient({ profile, tabs, isOwner = false }: {
                 company={profile.company}
                 city={profile.city}
                 bio={profile.bio}
+                pdfBlocks={haqidaPdfBlocks}
+                isOwner={isOwner}
               />
             )}
-            {activeTab === 'aloqa'     && <AloqaTab blocks={aloqaBlocks} showToast={showToast} />}
-            {activeTab === 'ijtimoiy'  && <IjtimoiyTab blocks={ijtimoiyBlocks} />}
-            {activeTab === 'qoshimcha' && <QoshimchaTab blocks={qoshimchaBlocks} />}
+            {activeTab === 'aloqa'    && <AloqaTab blocks={aloqaBlocks} showToast={showToast} />}
+            {activeTab === 'ijtimoiy' && <IjtimoiyTab blocks={ijtimoiyBlocks} username={profile.username} isOwner={isOwner} qrBlock={qrBlock} profileId={profile.id} />}
           </div>
 
         </div>

@@ -29,6 +29,8 @@ const STYLES = `
   .btn-icon:hover    { background: rgba(255,255,255,0.1) !important; }
   .toggle-wrap:active { transform: scale(0.95); }
   .add-btn:hover     { background: rgba(124,107,255,0.12) !important; border-color: rgba(124,107,255,0.4) !important; }
+  .upload-btn:hover  { background: rgba(124,107,255,0.12) !important; border-color: rgba(124,107,255,0.4) !important; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 `
 
 // ── Block type metadata ───────────────────────────────────────────────────────
@@ -46,7 +48,7 @@ const BLOCK_TYPE_META: Partial<Record<BlockType, { label: string; placeholder: s
   youtube:   { label: 'YouTube',    placeholder: 'https://youtube.com/@...', tab: 'ijtimoiy' },
   tiktok:    { label: 'TikTok',     placeholder: 'https://tiktok.com/@...', tab: 'ijtimoiy' },
   service:   { label: 'Xizmat',     placeholder: 'Xizmat nomi', tab: 'qoshimcha' },
-  pdf:       { label: 'PDF',        placeholder: 'https://...pdf', tab: 'qoshimcha' },
+  pdf:       { label: 'PDF',        placeholder: 'https://...pdf', tab: 'haqida' },
 }
 
 const ALOQA_TYPES:    BlockType[] = ['phone', 'email', 'card', 'click', 'payme']
@@ -543,6 +545,22 @@ export default function EditClient({ profile: initialProfile, tabs: initialTabs 
   const [tabs, setTabs] = useState(initialTabs)
   const [saving, setSaving] = useState(false)
 
+  // avatar upload
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(initialProfile.avatar_url)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+
+  // qr visibility (local mirror — source of truth is DB)
+  const [qrVisibleLocal, setQrVisibleLocal] = useState<boolean | null>(null)
+  const [qrBlockIdLocal, setQrBlockIdLocal] = useState<string | null>(null)
+
+  // pdf upload
+  const initialPdfBlock = initialTabs.flatMap(t => t.blocks).find(b => b.tab_slug === 'haqida' && b.type === 'pdf')
+  const [pdfUploading, setPdfUploading] = useState(false)
+  const [pdfDeleting, setPdfDeleting] = useState(false)
+  const [pdfFileName, setPdfFileName] = useState<string | null>(initialPdfBlock?.label ?? null)
+  const pdfInputRef = useRef<HTMLInputElement>(null)
+
   // Split full_name
   const nameParts = (profile.full_name ?? '').trim().split(/\s+/)
   const [firstName, setFirstName] = useState(nameParts[0] ?? '')
@@ -654,10 +672,106 @@ export default function EditClient({ profile: initialProfile, tabs: initialTabs 
     showToast('✓ Qo\'shildi')
   }
 
+  // ── Avatar upload ─────────────────────────────────────────────────────────
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setAvatarPreview(URL.createObjectURL(file))
+    setAvatarUploading(true)
+    // Delete any existing avatar files (extension may vary)
+    const { data: existing } = await supabase.storage.from('avatars').list(profile.id)
+    if (existing && existing.length > 0) {
+      await supabase.storage.from('avatars').remove(existing.map(f => `${profile.id}/${f.name}`))
+    }
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${profile.id}/avatar.${ext}`
+    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type })
+    if (upErr) { showToast('⚠ Rasm yuklanmadi', 'warning'); setAvatarUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    const { data, error } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id).select().single()
+    setAvatarUploading(false)
+    if (error) { showToast('⚠ Xatolik yuz berdi', 'warning'); return }
+    setProfile(data)
+    setAvatarPreview(publicUrl)
+    showToast('✓ Rasm yangilandi')
+    e.target.value = ''
+  }
+
+  // ── QR toggle ─────────────────────────────────────────────────────────────
+
+  const handleToggleQr = async () => {
+    const currentVisible = qrVisibleLocal !== null ? qrVisibleLocal : (qrBlock?.is_visible ?? true)
+    const next = !currentVisible
+    setQrVisibleLocal(next)
+    const blockId = qrBlockIdLocal ?? qrBlock?.id
+    if (blockId) {
+      const { error } = await supabase.from('blocks').update({ is_visible: next }).eq('id', blockId)
+      if (error) { setQrVisibleLocal(currentVisible); showToast('⚠ Xatolik yuz berdi', 'warning') }
+      else showToast(next ? '✓ QR yoqildi' : '⚠ QR yashirildi — mehmonlar ko\'rmaydi', next ? 'success' : 'warning')
+    } else {
+      const { data, error } = await supabase.from('blocks').insert({
+        profile_id: profile.id,
+        tab_slug: 'ijtimoiy',
+        type: 'qr',
+        value: 'auto',
+        label: 'QR Kod',
+        is_visible: next,
+        is_active: true,
+        sort_order: 99,
+      }).select().single()
+      if (error) { setQrVisibleLocal(currentVisible); showToast('⚠ Xatolik yuz berdi', 'warning') }
+      else { if (data) setQrBlockIdLocal(data.id); showToast(next ? '✓ QR yoqildi' : '⚠ QR yashirildi', next ? 'success' : 'warning') }
+    }
+  }
+
+  // ── PDF upload ────────────────────────────────────────────────────────────
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'pdf'
+    const contentTypeMap: Record<string, string> = {
+      pdf: 'application/pdf',
+      doc: 'application/msword',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    }
+    setPdfUploading(true)
+    const path = `${profile.id}/cv.${ext}`
+    const { error: upErr } = await supabase.storage.from('documents').upload(path, file, { upsert: true, contentType: contentTypeMap[ext] ?? 'application/octet-stream' })
+    if (upErr) { showToast('⚠ Fayl yuklanmadi', 'warning'); setPdfUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(path)
+    const allB = tabs.flatMap(t => t.blocks)
+    const existing = allB.find(b => b.tab_slug === 'haqida' && b.type === 'pdf')
+    const label = file.name
+    if (existing) {
+      await handleEditBlock(existing.id, publicUrl, label)
+    } else {
+      await handleAddBlock('haqida', 'pdf', publicUrl, label)
+    }
+    setPdfFileName(label)
+    setPdfUploading(false)
+    e.target.value = ''
+  }
+
+  const handleDeletePdf = async () => {
+    const allB = tabs.flatMap(t => t.blocks)
+    const pdfBlock = allB.find(b => b.tab_slug === 'haqida' && b.type === 'pdf')
+    if (!pdfBlock) return
+    setPdfDeleting(true)
+    const marker = '/object/public/documents/'
+    const storagePath = pdfBlock.value.includes(marker) ? pdfBlock.value.split(marker)[1] : null
+    if (storagePath) await supabase.storage.from('documents').remove([storagePath])
+    await handleDeleteBlock(pdfBlock.id)
+    setPdfFileName(null)
+    setPdfDeleting(false)
+    showToast("✓ CV o'chirildi")
+  }
+
   const allBlocks = tabs.flatMap(t => t.blocks)
-  const aloqaBlocks     = allBlocks.filter(b => b.tab_slug === 'aloqa')
-  const ijtimoiyBlocks  = allBlocks.filter(b => b.tab_slug === 'ijtimoiy')
-  const qoshimchaBlocks = allBlocks.filter(b => b.tab_slug === 'qoshimcha')
+  const aloqaBlocks    = allBlocks.filter(b => b.tab_slug === 'aloqa')
+  const ijtimoiyBlocks = allBlocks.filter(b => b.tab_slug === 'ijtimoiy' && b.type !== 'qr')
+  const qrBlock        = allBlocks.find(b => b.tab_slug === 'ijtimoiy' && b.type === 'qr')
 
   return (
     <>
@@ -737,12 +851,22 @@ export default function EditClient({ profile: initialProfile, tabs: initialTabs 
               animation: 'fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both',
             }}>
               {/* Avatar */}
-              <div style={{ position: 'relative', flexShrink: 0 }}>
-                {profile.avatar_url ? (
+              <div
+                style={{ position: 'relative', flexShrink: 0, cursor: 'pointer' }}
+                onClick={() => !avatarUploading && avatarInputRef.current?.click()}
+              >
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleAvatarChange}
+                />
+                {avatarPreview ? (
                   <img
-                    src={profile.avatar_url}
+                    src={avatarPreview}
                     alt={profile.full_name ?? profile.username}
-                    style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }}
+                    style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', opacity: avatarUploading ? 0.5 : 1, transition: 'opacity 0.2s' }}
                   />
                 ) : (
                   <div style={{
@@ -750,6 +874,7 @@ export default function EditClient({ profile: initialProfile, tabs: initialTabs 
                     background: 'linear-gradient(135deg, #7c6bff, #a78bfa)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: '#fff', fontSize: 22, fontWeight: 600,
+                    opacity: avatarUploading ? 0.5 : 1, transition: 'opacity 0.2s',
                   }}>
                     {initials}
                   </div>
@@ -757,11 +882,16 @@ export default function EditClient({ profile: initialProfile, tabs: initialTabs 
                 <div style={{
                   position: 'absolute', bottom: 0, right: 0,
                   width: 22, height: 22, borderRadius: '50%',
-                  background: '#5dcaa5',
+                  background: avatarUploading ? 'rgba(93,202,165,0.5)' : '#5dcaa5',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   border: '2px solid #07070f',
+                  transition: 'background 0.2s',
                 }}>
-                  <IconCamera />
+                  {avatarUploading ? (
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.7s linear infinite' }} />
+                  ) : (
+                    <IconCamera />
+                  )}
                 </div>
               </div>
 
@@ -832,7 +962,7 @@ export default function EditClient({ profile: initialProfile, tabs: initialTabs 
               </div>
 
               {/* Bio */}
-              <div>
+              <div style={{ marginBottom: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
                   <div style={{ fontSize: 11, color: 'rgba(240,238,255,0.3)', fontWeight: 500, letterSpacing: 0.5 }}>Bio</div>
                   <div style={{ fontSize: 11, color: bio.length > 140 ? '#f0b429' : 'rgba(240,238,255,0.2)' }}>
@@ -848,6 +978,117 @@ export default function EditClient({ profile: initialProfile, tabs: initialTabs 
                   suppressHydrationWarning
                 />
               </div>
+
+              {/* CV / PDF upload */}
+              {(() => {
+                const pdfBlock = tabs.flatMap(t => t.blocks).find(b => b.tab_slug === 'haqida' && b.type === 'pdf')
+                return (
+                  <div>
+                    <div style={{ fontSize: 11, color: 'rgba(240,238,255,0.3)', marginBottom: 8, fontWeight: 500, letterSpacing: 0.5 }}>CV / Rezyume</div>
+                    <input
+                      ref={pdfInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      style={{ display: 'none' }}
+                      onChange={handlePdfUpload}
+                    />
+                    {pdfBlock ? (
+                      <div style={{
+                        background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)',
+                        borderRadius: 10, padding: '11px 13px',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                          <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8l4 4 6-7" stroke="#5dcaa5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          <span style={{ fontSize: 13, color: 'rgba(240,238,255,0.6)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {pdfFileName ?? pdfBlock.label ?? 'cv.pdf'}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button
+                            className="upload-btn"
+                            onClick={() => !pdfUploading && pdfInputRef.current?.click()}
+                            disabled={pdfUploading || pdfDeleting}
+                            style={{
+                              flex: 1, padding: '8px 0', borderRadius: 8,
+                              background: 'rgba(124,107,255,0.06)',
+                              border: '0.5px solid rgba(124,107,255,0.2)',
+                              color: pdfUploading ? 'rgba(124,107,255,0.4)' : 'rgba(124,107,255,0.7)',
+                              fontSize: 12, fontWeight: 500, cursor: pdfUploading ? 'not-allowed' : 'pointer',
+                              fontFamily: 'inherit', transition: 'all 0.15s',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                            }}
+                          >
+                            {pdfUploading ? (
+                              <>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', border: '1.5px solid rgba(124,107,255,0.3)', borderTopColor: '#a78bfa', animation: 'spin 0.7s linear infinite' }} />
+                                Yuklanmoqda...
+                              </>
+                            ) : 'Almashtirish'}
+                          </button>
+                          <button
+                            onClick={handleDeletePdf}
+                            disabled={pdfDeleting || pdfUploading}
+                            style={{
+                              flex: 1, padding: '8px 0', borderRadius: 8,
+                              background: 'rgba(255,80,80,0.06)',
+                              border: '0.5px solid rgba(255,80,80,0.15)',
+                              color: pdfDeleting ? 'rgba(255,128,128,0.4)' : 'rgba(255,128,128,0.7)',
+                              fontSize: 12, fontWeight: 500, cursor: pdfDeleting ? 'not-allowed' : 'pointer',
+                              fontFamily: 'inherit', transition: 'all 0.15s',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                            }}
+                          >
+                            {pdfDeleting ? (
+                              <>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', border: '1.5px solid rgba(255,128,128,0.3)', borderTopColor: '#ff8080', animation: 'spin 0.7s linear infinite' }} />
+                                O&apos;chirilmoqda...
+                              </>
+                            ) : "O'chirish"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          className="upload-btn"
+                          onClick={() => !pdfUploading && pdfInputRef.current?.click()}
+                          disabled={pdfUploading}
+                          style={{
+                            width: '100%', padding: '10px 0', borderRadius: 9,
+                            background: 'rgba(124,107,255,0.06)',
+                            border: '0.5px dashed rgba(124,107,255,0.25)',
+                            color: pdfUploading ? 'rgba(124,107,255,0.4)' : 'rgba(124,107,255,0.7)',
+                            fontSize: 13, fontWeight: 500,
+                            cursor: pdfUploading ? 'not-allowed' : 'pointer',
+                            fontFamily: 'inherit', transition: 'all 0.15s',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                          }}
+                        >
+                          {pdfUploading ? (
+                            <>
+                              <div style={{ width: 12, height: 12, borderRadius: '50%', border: '1.5px solid rgba(124,107,255,0.3)', borderTopColor: '#a78bfa', animation: 'spin 0.7s linear infinite' }} />
+                              Yuklanmoqda...
+                            </>
+                          ) : (
+                            <>
+                              <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+                                <path d="M8 11V3M5 6l3-3 3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M2 13h12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                              </svg>
+                              + CV yuklash (.pdf, .doc, .docx)
+                            </>
+                          )}
+                        </button>
+                        <div style={{ marginTop: 6, fontSize: 11, color: 'rgba(240,238,255,0.2)', textAlign: 'center' }}>
+                          Qo&apos;llab-quvvatlanadigan formatlar: PDF, DOC, DOCX (max 5MB)
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )
+              })()}
             </SectionCard>
 
             {/* ── Section 2: Bo'limlar (tabs) ── */}
@@ -902,16 +1143,24 @@ export default function EditClient({ profile: initialProfile, tabs: initialTabs 
               onAdd={(type, value, label) => handleAddBlock('ijtimoiy', type, value, label)}
             />
 
-            {/* ── Section 3c: Qo'shimcha ── */}
-            <BlocksSection
-              title="Qo'shimcha"
-              blocks={qoshimchaBlocks}
-              tabSlug="qoshimcha"
-              onToggleVisible={handleToggleBlock}
-              onEditSave={handleEditBlock}
-              onDelete={handleDeleteBlock}
-              onAdd={(type, value, label) => handleAddBlock('qoshimcha', type, value, label)}
-            />
+            {/* ── QR Kod toggle ── */}
+            {(() => {
+              const qrOn = qrVisibleLocal !== null ? qrVisibleLocal : (qrBlock?.is_visible ?? true)
+              return (
+                <SectionCard title="QR Kod">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14, color: '#f0eeff', fontWeight: 500 }}>QR Kod</div>
+                      <div style={{ fontSize: 11, color: qrOn ? 'rgba(93,202,165,0.7)' : 'rgba(240,238,255,0.2)', marginTop: 1 }}>
+                        {qrOn ? 'Mehmonlarga ko\'rinadi' : 'Yashirilgan'}
+                      </div>
+                    </div>
+                    <Toggle on={qrOn} onChange={handleToggleQr} />
+                  </div>
+                </SectionCard>
+              )
+            })()}
+
 
           </div>
         </div>
