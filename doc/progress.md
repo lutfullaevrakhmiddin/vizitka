@@ -27,22 +27,24 @@
 ## Bosqich 1 — MVP
 
 ### 1.1 Landing Page
-- [ ] Hero section
-- [ ] Qanday ishlaydi (3 qadam)
-- [ ] Ishonch bolimi
-- [ ] Demo vizitka
-- [ ] CTA tugmasi
-- [ ] Mobile responsiv
+- [x] Hero section
+- [x] Qanday ishlaydi (3 qadam)
+- [x] Ishonch bolimi
+- [x] Demo vizitka (phone mockup)
+- [x] Testimonials karusel
+- [x] CTA tugmasi
+- [x] Mobile responsiv
 
 ### 1.2 Auth
-- [ ] Usul tanlash (Telegram / Email)
-- [x] Telegram: bot kod yuboradi
-- [ ] Email: kod yuboriladi
-- [ ] Kodni tasdiqlash
-- [ ] Username tanlash (vizitka.me/[username])
-- [ ] Parol ornatish
-- [ ] Kirish (login)
+- [x] Usul tanlash (Telegram / Email)
+- [x] Email: kod yuboriladi (Supabase OTP)
+- [x] Kodni tasdiqlash
+- [x] Username tanlash (vizitka.me/[username])
+- [x] Parol ornatish
+- [x] Kirish (login)
 - [ ] Chiqish (logout)
+- [ ] Register — Supabase ulash (to'liq oqim)
+- [ ] Telegram bot orqali kod yuborish
 
 ### 1.3 Vizitka — /[username]
 
@@ -53,6 +55,7 @@
 - [x] Kompaniya
 - [x] Shahar
 - [x] Bio
+- [x] CV / Rezyume PDF
 
 #### Tab 2: Aloqa
 - [x] Telefon
@@ -69,42 +72,40 @@
 - [x] YouTube
 - [x] TikTok
 - [x] Boshqa link
-
-#### Tab 4: Qoshimcha (egasi yoqsa korinadi)
-- [x] Xizmatlar
-- [x] Portfolio
-- [x] Rezyume PDF
+- [x] QR kod
 
 #### Umumiy
 - [x] Mehmon: faqat faol tablar
-- [x] Vizitka sahifasi — mehmon korinishi tayyor
-- [x] QR kod — mehmon ham koradi
+- [x] Egasi: tahrirlash paneli
+- [x] QR kod — yuklab olish
 - [x] Sahifani ulashish tugmasi
 
 ### 1.4 Tahrirlash paneli
-- [ ] Profil malumotlarini tahrirlash
-- [ ] Tab yoqish / ochirish
-- [ ] Blok tahrirlash / yashirish / ochirish
-- [ ] Tartib ozgartirish (drag & drop)
-- [ ] Ozgarishlarni saqlash
+- [x] Profil malumotlarini tahrirlash
+- [x] Tab yoqish / ochirish
+- [x] Blok tahrirlash / yashirish / ochirish
+- [x] Avatar yuklash
+- [x] CV / PDF yuklash
+- [x] Ozgarishlarni saqlash
+- [x] Saqlashdan keyin profil sahifasiga qaytish
 
 ### 1.5 Database
 - [x] profiles jadvali
 - [x] tabs jadvali
 - [x] blocks jadvali
 - [x] RLS qoidalari
-- [x] Storage bucket — avatars (public)
+- [x] Storage bucket — avatars
+- [x] Storage bucket — documents
 
 ### 1.6 Telegram Bot
-- [ ] Bot yaratish (@BotFather)
-- [ ] Kod yuborish
-- [ ] Xabar shabloni
+- [x] Bot yaratish — @vizitka_official_bot
+- [ ] Telegram orqali kod yuborish (hozircha email ishlatilmoqda)
 
 ---
 
 ## Bosqich 2 — Kengaytirish
 - [ ] Koririshlar statistikasi
-- [ ] Blok statistikasi (qaysi tugmaga kop bosildi)
+- [ ] Blok statistikasi
 - [ ] Sahifani ulashish (WhatsApp, Telegram)
 - [ ] Vizitka tema sozlash
 
@@ -118,4 +119,4 @@
 
 ---
 
-## Oxirgi yangilangan: 2025-05-22
+## Oxirgi yangilangan: 2026-05-26
