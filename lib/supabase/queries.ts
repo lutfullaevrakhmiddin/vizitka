@@ -27,7 +27,6 @@ export async function getProfileWithTabs(username: string): Promise<ProfileWithT
     .eq('username', username)
     .single()
 
-  console.log("PROFILE:", JSON.stringify(profile)); if (!profile) return null
 
   const [{ data: tabs }, { data: blocks }] = await Promise.all([
     supabase
