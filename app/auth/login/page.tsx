@@ -54,7 +54,7 @@ export default function LoginPage() {
         triggerShake()
         return
       }
-      window.location.href =('/sardor')
+      window.location.href = '/dashboard'
     } finally {
       setLoading(false)
     }

@@ -35,6 +35,7 @@ const STYLES = `
   .c-btn-primary:hover  { background: rgba(124,107,255,0.25) !important; }
   .social-card:hover    { border-color: rgba(124,107,255,0.35) !important; background: rgba(124,107,255,0.05) !important; transform: translateY(-2px); }
   .btn-edit:hover       { background: rgba(93,202,165,0.2) !important; }
+  .btn-signout:hover    { background: rgba(255,128,128,0.15) !important; }
 `
 
 // ── Icons (header) ─────────────────────────────────────────────────────────────
@@ -872,6 +873,12 @@ export default function ProfileClient({ profile, tabs, isOwner = false }: {
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [])
 
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
   const showToast = useCallback((text: string) => {
     if (timerRef.current) clearTimeout(timerRef.current)
     setToast({ text, visible: true })
@@ -922,6 +929,27 @@ export default function ProfileClient({ profile, tabs, isOwner = false }: {
           {/* ── Header ── */}
           <div style={{ padding: '48px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', isolation: 'isolate' }}>
             {isOwner && (
+              <button
+                className="btn-signout"
+                onClick={handleSignOut}
+                style={{
+                  position: 'absolute', top: 14, left: 0,
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 13px', borderRadius: 10,
+                  background: 'rgba(255,128,128,0.08)',
+                  border: '0.5px solid rgba(255,128,128,0.2)',
+                  color: 'rgba(255,128,128,0.7)', fontSize: 13, fontWeight: 500,
+                  fontFamily: 'inherit', cursor: 'pointer',
+                  transition: 'background 0.18s',
+                }}
+              >
+                <svg width={13} height={13} viewBox="0 0 16 16" fill="none">
+                  <path d="M6 13H3a1 1 0 01-1-1V4a1 1 0 011-1h3M10.5 10.5l3-2.5-3-2.5M7 8h6.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Chiqish
+              </button>
+            )}
+          {isOwner && (
               <button
                 className="btn-edit"
                 onClick={() => router.push(`/${profile.username}/edit`)}
