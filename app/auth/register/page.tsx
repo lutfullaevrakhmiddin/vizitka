@@ -195,7 +195,7 @@ export default function RegisterPage() {
         .method-card{border:.5px solid rgba(255,255,255,.07);border-radius:14px;padding:15px 13px;display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer;background:rgba(255,255,255,.02);transition:all .2s}
         .method-card:hover{border-color:rgba(124,107,255,.35);background:rgba(124,107,255,.05);transform:translateX(2px)}
         .method-selected{border-color:rgba(124,107,255,.3)!important;background:rgba(124,107,255,.04)!important}
-        .otp-box{flex:1;height:54px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.08);border-radius:11px;text-align:center;font-size:22px;font-weight:500;color:#f0eeff;outline:none;-webkit-appearance:none;font-family:monospace;transition:all .18s;caret-color:transparent;padding:0}
+        .otp-box{flex:0 0 44px;max-width:44px;height:48px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.08);border-radius:11px;text-align:center;font-size:20px;font-weight:500;color:#f0eeff;outline:none;-webkit-appearance:none;font-family:monospace;transition:all .18s;caret-color:transparent;padding:0}
         .otp-box:focus{border-color:rgba(124,107,255,.5);background:rgba(124,107,255,.06)}
         .otp-filled{border-color:rgba(124,107,255,.35)!important;background:rgba(124,107,255,.08)!important;color:#c4b8ff!important}
         .back-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:rgba(240,238,255,.3);cursor:pointer;background:none;border:none;font-family:inherit;padding:0;margin-bottom:18px;transition:color .2s}
@@ -208,7 +208,7 @@ export default function RegisterPage() {
       <div className="orb" style={{ width: 260, height: 260, background: 'rgba(124,107,255,.09)', top: -70, right: -50 }} />
       <div className="orb" style={{ width: 180, height: 180, background: 'rgba(255,107,157,.05)', bottom: -30, left: -30, animationDirection: 'reverse', animationDuration: '11s' }} />
 
-      <div style={{ background: 'rgba(255,255,255,.03)', border: '.5px solid rgba(255,255,255,.08)', borderRadius: 24, padding: '28px 22px 24px', width: '100%', maxWidth: 390, position: 'relative', zIndex: 1, animation: 'fadeUp .5s cubic-bezier(.16,1,.3,1) both' }}>
+      <div style={{ background: 'rgba(255,255,255,.03)', border: '.5px solid rgba(255,255,255,.08)', borderRadius: 24, padding: '32px 24px 28px', width: '100%', maxWidth: 390, position: 'relative', zIndex: 1, animation: 'fadeUp .5s cubic-bezier(.16,1,.3,1) both' }}>
 
         <div style={{ fontSize: 19, fontWeight: 500, color: '#f0eeff', letterSpacing: -.4, marginBottom: 18 }}>
           vizitka<span style={{ color: '#7c6bff' }}>.me</span>
@@ -323,7 +323,7 @@ export default function RegisterPage() {
             <div style={{ fontSize: 13, color: 'rgba(240,238,255,.3)', lineHeight: 1.6, marginBottom: 20 }}>
               <span style={{ color: '#a78bfa', fontFamily: 'monospace' }}>{email}</span>ga kod yuborildi
             </div>
-            <div style={{ display: 'flex', gap: 7, marginBottom: 8 }}>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
               {otp.map((d, i) => (
                 <input
                   key={i}
